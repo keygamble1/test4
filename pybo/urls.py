@@ -4,7 +4,7 @@ from django.urls import path
 
 from . import views
 
-# 별칭중복 고려해서 app_name써줌
+# 별칭중복 고려해서 app_name써줌dd
 app_name='pybo'
 
 
