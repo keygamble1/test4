@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% comment %} extend block은 짝궁 {% endcomment %}
+{% block content %}
+<div class="container">
+    {% comment %} 숫자는 ^승 my-3 이면 2^3-1 16 2^n+1 2^4승 pixel {% endcomment %}
+    <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    {% comment %} pb는 하얀색을 채워라 my 는 떨어뜨려라 {% endcomment %}
+    <form  method="post">
+        {% csrf_token %}
+        {% if form.errors  %}
+        <div class="alert alert-danger" role="alert">
+            {% for field  in  form %}
+            {% if field.errors %}
+            <div>
+                <strong>{{field.label}} </strong>
+                {{field.errors}}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <label for="subject" class="form-label">질문</label>
+            <input type="text" class="form-control" name="subject" id="subject"
+               value="{{form.subject.value|default_if_none:""}} " >
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">내용</label>
+            <textarea name="content" id="content" rows="10" class="form-control"
+            value={{form.content.value|default_if_none:""}}> </textarea>
+        </div>
+  
+        <button type="submit" class="btn btn-primary">저장하기</button>
+    </form>
+</div>
+
+
+{% endblock  %}

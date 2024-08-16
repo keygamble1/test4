@@ -1,0 +1,9 @@
+/* textarea일때 100% 꽉차게 */
+/* input일때 margin 위에 10px띄기 */
+textarea{
+    width:100%;
+}
+
+input[type=submit]{
+    margin-top:10px;
+}
