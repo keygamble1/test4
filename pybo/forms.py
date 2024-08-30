@@ -9,6 +9,7 @@ from pybo.models import Answer, Question
 # Question모델의 subject,content를 사용한다고 정의한것
 class QuestionForm(forms.ModelForm):
     class Meta:
+        # forms.ModelForm에서 model,fields,labels를 불러오는것
         model = Question
         fields = ['subject','content']
         # widgets={

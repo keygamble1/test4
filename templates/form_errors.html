@@ -1,0 +1,22 @@
+{% if form.errors %}
+<div class="alert alert-danger">
+    {% for field in form %}
+    {% if field.errors %}
+    <div>
+        {% comment %} 이건 filed error {% endcomment %}
+        {% comment %} django에서 정의도니 suer는 label error가 다정의되어있음  {% endcomment %}
+        <strong>{{field.label}} </strong>
+        {{field.errors}}
+    </div>
+    
+    {% endif %}
+    
+    {% endfor %}
+    {% for error in form.non_field_errors  %}
+    <div>
+        <strong>{{error}} </strong>
+    </div>
+    {% endfor %}
+</div>
+
+{% endif %}

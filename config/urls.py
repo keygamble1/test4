@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from pybo import views
+
 # url안에 views는 기본
 # 근데 pybo url안에 views를 쓰는게낫지
 # config url안에 pybo views를 쓰는건 좀아님
@@ -27,6 +29,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('pybo/',include('pybo.urls')),
     path('common/',include('common.urls')),
+    path('',views.index,name='index')
+    #  '/' 에해당는 path
     # views를 가져와서 연결시켜야함
     # admin/은 원ㄹ래이씀
 ]
