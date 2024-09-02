@@ -1,7 +1,12 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
 class Question(models.Model):
+    # user=1 question 다
+    # 1이삭제시 다가 삭제되도록
+    author=models.ForeignKey(User,on_delete=models.CASCADE)
+    
     subject=models.CharField(max_length=200)
     content=models.TextField()
     create_date=models.DateTimeField()
@@ -12,7 +17,8 @@ class Question(models.Model):
     # Question에서 answer_set으로
 class Answer(models.Model):
     # Question의 역참조의 주체) question 필드로 작성한 질문들을 answer_set으로 여감조함 
-    
+    # question삭제시 ansewr 다삭제
+    author=models.ForeignKey(User,on_delete=models.CASCADE)
     question=models.ForeignKey(Question,on_delete=models.CASCADE)
     content=models.TextField()
     create_date=models.DateTimeField()

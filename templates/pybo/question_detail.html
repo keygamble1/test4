@@ -52,7 +52,9 @@
             <label for="content">답변내용</label>
             {% comment %} form control은 위아래가 맞춰지는 느낌임 card와 form을 맞추려면
             formcontrol 해줘야함 form-lable도 해주면좋고 {% endcomment %}
-            <textarea name="content" id="content" class="form-control" rows=10></textarea>
+            <textarea {% if not user.is_authenticated %}disabled{% endif %}
+            {% comment %} disalbed그냥닫는것 입력못하게 {% endcomment %}
+            name="content" id="content" class="form-control" rows=10></textarea>
         </div>
         <input type="submit" value="답변등록" class="btn btn-primary">
 

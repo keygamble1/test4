@@ -1,0 +1,165 @@
+warning: in the working copy of 'common/forms.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'common/urls.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mysite/Lib/site-packages/django/contrib/auth/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mysite/Lib/site-packages/django/contrib/auth/forms.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/common/login.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'templates/pybo/question_detail.html', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/common/forms.py b/common/forms.py[m
+[1mindex 19af77c..31ac7ee 100644[m
+[1m--- a/common/forms.py[m
+[1m+++ b/common/forms.py[m
+[36m@@ -2,5 +2,18 @@[m [mfrom django import forms[m
+ from django.contrib.auth.forms import UserCreationForm[m
+ from django.contrib.auth.models import User[m
+ [m
+[32m+[m
+[32m+[m[32m# contribute 원인 .인증. forms.py 는 form과 models,field가 필요[m
+[32m+[m[32m# 그래서 forms. usercreateForm 과 models인 user를 불러옴[m
+[32m+[m[32mclass UserForm(UserCreationForm):[m
+[32m+[m[32m    # 모델은 데이터베이스 구조를 정의하고,[m[41m [m
+[32m+[m[32m    # 폼은 사용자 입력을 처리하는 데 사용됩니다.[m
+[32m+[m[32m    # 필드를 안할경우 error가 안나와서 필드를 빼먹고 form에 넣어서 경고가[m
+[32m+[m[32m    # 되는지도모르기땜에 왠만하면 이렇게하는 형식이 좋다[m
+[32m+[m[32m    email=forms.EmailField(label="이메일")[m
+[32m+[m[32m    class Meta:[m
+[32m+[m[32m        model = User[m
+[32m+[m[32m        fields = ["username","password1","password2","email"][m
+[32m+[m
+ # d[m
+ # Form을 부르는거니까 일단 ,model과 field가 있어야함[m
+[1mdiff --git a/common/views.py b/common/views.py[m
+[1mindex 007de54..e1e5b8b 100644[m
+[1m--- a/common/views.py[m
+[1m+++ b/common/views.py[m
+[36m@@ -1,6 +1,8 @@[m
+[31m-from django.contrib.auth import logout[m
+[32m+[m[32mfrom django.contrib.auth import authenticate, login, logout[m
+ from django.shortcuts import redirect, render[m
+ [m
+[32m+[m[32mfrom common.forms import UserForm[m
+[32m+[m
+ [m
+ # Create your views here.[m
+ def logout_view(request):[m
+[36m@@ -8,4 +10,18 @@[m [mdef logout_view(request):[m
+     return redirect('index')[m
+ [m
+ def signup(request):[m
+[31m-    pass[m
+\ No newline at end of file[m
+[32m+[m[32m    if request.method == "POST":[m
+[32m+[m[32m        form=UserForm(request.POST)[m
+[32m+[m[32m        # request.post도 class의 형태임[m
+[32m+[m[32m        if form.is_valid():[m
+[32m+[m[32m            form.save()[m
+[32m+[m[32m            # form의 필드값이 일치할경우 딕셔너리에 넣어버린다[m
+[32m+[m[32m            # 귀찮으니 form.errors로 통일하려고 form model형식으로 쓰는게 낫다[m
+[32m+[m[32m            username=form.cleaned_data.get('username')[m
+[32m+[m[32m            raw_password=form.cleaned_data.get('password1')[m
+[32m+[m[32m            user=authenticate(username=username,password=raw_password)[m
+[32m+[m[32m            login(request,user)[m
+[32m+[m[32m            return redirect('index')[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        form=UserForm()[m
+[32m+[m[32m    return render(request,'common/signup.html',{'form':form})[m
+\ No newline at end of file[m
+[1mdiff --git a/pybo/models.py b/pybo/models.py[m
+[1mindex a7a3edd..2ae240d 100644[m
+[1m--- a/pybo/models.py[m
+[1m+++ b/pybo/models.py[m
+[36m@@ -1,7 +1,12 @@[m
+[32m+[m[32mfrom django.contrib.auth.models import User[m
+ from django.db import models[m
+ [m
+ [m
+ class Question(models.Model):[m
+[32m+[m[32m    # user=1 question 다[m
+[32m+[m[32m    # 1이삭제시 다가 삭제되도록[m
+[32m+[m[32m    author=models.ForeignKey(User,on_delete=models.CASCADE)[m
+[32m+[m[41m    [m
+     subject=models.CharField(max_length=200)[m
+     content=models.TextField()[m
+     create_date=models.DateTimeField()[m
+[36m@@ -12,7 +17,8 @@[m [mclass Question(models.Model):[m
+     # Question에서 answer_set으로[m
+ class Answer(models.Model):[m
+     # Question의 역참조의 주체) question 필드로 작성한 질문들을 answer_set으로 여감조함 [m
+[31m-    [m
+[32m+[m[32m    # question삭제시 ansewr 다삭제[m
+[32m+[m[32m    author=models.ForeignKey(User,on_delete=models.CASCADE)[m
+     question=models.ForeignKey(Question,on_delete=models.CASCADE)[m
+     content=models.TextField()[m
+     create_date=models.DateTimeField()[m
+[1mdiff --git a/pybo/views.py b/pybo/views.py[m
+[1mindex 437c4f3..e9245a4 100644[m
+[1m--- a/pybo/views.py[m
+[1m+++ b/pybo/views.py[m
+[36m@@ -1,3 +1,4 @@[m
+[32m+[m[32mfrom django.contrib.auth.decorators import login_required[m
+ from django.core.paginator import Paginator[m
+ from django.http import HttpResponseNotAllowed[m
+ from django.shortcuts import get_object_or_404, redirect, render[m
+[36m@@ -53,6 +54,8 @@[m [mdef detail(request,question_id):[m
+     context={'question':question}[m
+     return render(request,'pybo/question_detail.html',context)[m
+     # filed는 list로 0,1로 구분가능[m
+[32m+[m[41m    [m
+[32m+[m[32m@login_required(login_url='common:login')[m
+ def answer_create(request,question_id):[m
+     # 대신 0,1,2,3,4,5,로 인덱스로 구별[m
+     # 배열 [] [1,2,3,1,23]가능[m
+[36m@@ -69,6 +72,8 @@[m [mdef answer_create(request,question_id):[m
+             answer=form.save(commit=False)[m
+             answer.create_date=timezone.now()[m
+             answer.question=question[m
+[32m+[m[32m            answer.author=request.user[m
+[32m+[m[41m            [m
+             answer.save()[m
+             return redirect('pybo:detail',question.id)[m
+     else:[m
+[36m@@ -91,12 +96,15 @@[m [mdef answer_create(request,question_id):[m
+     [m
+     # content에 의 키값(name) 을찾아서 value를 가져와라[m
+     # 모델_set 모델셋[m
+[32m+[m[32m    # login_url안쓰면 account라는 이상한대로가버림[m
+[32m+[m[32m@login_required(login_url='common:login')[m
+ def question_create(request):[m
+     if request.method == "POST":[m
+         form=QuestionForm(request.POST)[m
+         if form.is_valid():[m
+             question=form.save(commit=False)[m
+             question.create_date=timezone.now()[m
+[32m+[m[32m            question.author=request.user[m
+             question.save()[m
+             return redirect('pybo:index') [m
+         # form에 들어갈 model만 forms.py에넣고 그외에는 views에서 자동처리하게만듬[m
+[1mdiff --git a/templates/common/login.html b/templates/common/login.html[m
+[1mindex 1319eed..b8404b0 100644[m
+[1m--- a/templates/common/login.html[m
+[1m+++ b/templates/common/login.html[m
+[36m@@ -5,6 +5,10 @@[m
+ [m
+     <form action="{% url 'common:login' %}" method="post">[m
+         {% csrf_token %}[m
+[32m+[m[32m        <input type="hidden" name="next" value="{{next}}">[m
+[32m+[m[32m        {% comment %} 로그인페이지로 리디렉션되는 것 {% endcomment %}[m
+[32m+[m[32m        {% comment %} form안에 hidden이있고 url value를 next로 잡는다 {% endcomment %}[m
+[32m+[m[32m        {% comment %} 로그인성공후 이동되는 url {% endcomment %}[m
+         {% include "form_errors.html" %}[m
+         <div class="mb-3">[m
+             <label for="username">사용자ID</label>[m
+[1mdiff --git a/templates/pybo/question_detail.html b/templates/pybo/question_detail.html[m
+[1mindex 1fc84dc..dc70f7e 100644[m
+[1m--- a/templates/pybo/question_detail.html[m
+[1m+++ b/templates/pybo/question_detail.html[m
+[36m@@ -52,7 +52,9 @@[m
+             <label for="content">답변내용</label>[m
+             {% comment %} form control은 위아래가 맞춰지는 느낌임 card와 form을 맞추려면[m
+             formcontrol 해줘야함 form-lable도 해주면좋고 {% endcomment %}[m
+[31m-            <textarea name="content" id="content" class="form-control" rows=10></textarea>[m
+[32m+[m[32m            <textarea {% if not user.is_authenticated %}disabled{% endif %}[m
+[32m+[m[32m            {% comment %} disalbed그냥닫는것 입력못하게 {% endcomment %}[m
+[32m+[m[32m            name="content" id="content" class="form-control" rows=10></textarea>[m
+         </div>[m
+         <input type="submit" value="답변등록" class="btn btn-primary">[m
+ [m

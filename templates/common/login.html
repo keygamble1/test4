@@ -5,6 +5,10 @@
 
     <form action="{% url 'common:login' %}" method="post">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{next}}">
+        {% comment %} 로그인페이지로 리디렉션되는 것 {% endcomment %}
+        {% comment %} form안에 hidden이있고 url value를 next로 잡는다 {% endcomment %}
+        {% comment %} 로그인성공후 이동되는 url {% endcomment %}
         {% include "form_errors.html" %}
         <div class="mb-3">
             <label for="username">사용자ID</label>

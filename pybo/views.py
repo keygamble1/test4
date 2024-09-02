@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
@@ -53,6 +54,8 @@ def detail(request,question_id):
     context={'question':question}
     return render(request,'pybo/question_detail.html',context)
     # filed는 list로 0,1로 구분가능
+    
+@login_required(login_url='common:login')
 def answer_create(request,question_id):
     # 대신 0,1,2,3,4,5,로 인덱스로 구별
     # 배열 [] [1,2,3,1,23]가능
@@ -69,6 +72,8 @@ def answer_create(request,question_id):
             answer=form.save(commit=False)
             answer.create_date=timezone.now()
             answer.question=question
+            answer.author=request.user
+            
             answer.save()
             return redirect('pybo:detail',question.id)
     else:
@@ -91,12 +96,15 @@ def answer_create(request,question_id):
     
     # content에 의 키값(name) 을찾아서 value를 가져와라
     # 모델_set 모델셋
+    # login_url안쓰면 account라는 이상한대로가버림
+@login_required(login_url='common:login')
 def question_create(request):
     if request.method == "POST":
         form=QuestionForm(request.POST)
         if form.is_valid():
             question=form.save(commit=False)
             question.create_date=timezone.now()
+            question.author=request.user
             question.save()
             return redirect('pybo:index') 
         # form에 들어갈 model만 forms.py에넣고 그외에는 views에서 자동처리하게만듬
