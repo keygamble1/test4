@@ -3,29 +3,48 @@
 {% load pybo_filter %}
 {% comment %} py파일 =load extends는 html {% endcomment %}
 <div class="container my-3">
+  <div class="row my-3 ">
+    <div class="col-6">
+      <a href="{% url 'pybo:question_create' %}" class="btn btn-primary">질문등록하기</a>
+    </div>
+    {% comment %} id는 javascript때문에 사용 {% endcomment %}
+    <div class="col-6">
+      <div class="input-group">
+          <input type="text" id="search_kw" class="form-control" value="{{kw|default_if_none:''}}">
+          <div class="input-group-append">
+              <button type="button" class="btn btn-outline-secondary" id="btn_search">찾기</button>
+          </div>
+      </div>
+
+    </div>
+  </div>
     <table class="table">
         <thead>
-            <tr class="table-dark">
+            <tr class="text-center table-dark">
                 <th>번호</th>
-                <th>제목</th>
+                <th style="width:50%">제목</th>
+                <th>글쓴이</th>
                 <th>작성일시</th>
             </tr>
         </thead>
         <tbody>
             {% if question_list %}
             {% for question in question_list  %}
-            <tr>
+            <tr class="text-center">
                 {% comment %} tr은 공통된 행이고, 거기서 데이터끊어주기위해 td th를쓴다고봐야함 {% endcomment %}
                 <td>
                   {{question_list.paginator.count|sub:question_list.start_index|sub:forloop.counter0|add:1 }}
                     {% comment %} forllop.counter0는 0 0없으면 1부터 {% endcomment %}
                 </td>
-                <td>
+                <td class="text-start">
                     {% comment %} url하고 ,안찍음 {% endcomment %}
                     <a href="{% url 'pybo:detail' question.id %}">{{question.subject}} </a>
                     {% if question.answer_set.count > 0 %}
                       <span class="text-danger small mx-2"> {{question.answer_set.count}} </span>
                     {% endif %}
+                </td>
+                <td>
+                  {{question.author.username}}
                 </td>
                 {% comment %} as_가들어가면 모델이나 html 을 자동생성해준다라고봐야함? {% endcomment %}
                 <td>{{question.create_date}} </td>
@@ -33,39 +52,45 @@
             {% endfor %}
             {% else %}
             <tr>
-                <td></td>
+                <td colspan="4">질문이없음 </td>
             </tr>
             {% endif %}
         </tbody>
     </table>
-    <a href="{% url 'pybo:question_create' %}" class="btn btn-primary">질문등록하기</a>
+    
 </div>
 
   <ul class="pagination justify-content-center">
   {% if  question_list.has_previous %}
   <li class="page-item">
       {% comment %} aria-disabled는 보조기능사용시에도 없앰 {% endcomment %}
-      <a class="page-link" href="?page= {{question_list.previous_page_number}}" >이전</a>
+      {% comment %} data-page 는 자동으로 ?page로 됨 data- = ?로 {% endcomment %}
+      <a class="page-link" data-page="{{ question_list.previous_page_number }}"
+      href="javascript:void(0)">이전</a>
   </li>
   
   {% else %}
     <li class="page-item disabled">
-      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">이전</a>
+      <a class="page-link" href="javascript:void(0)" tabindex="-1" aria-disabled="true"
+      >이전</a>
     </li>
   {% endif %}
+  {% comment %} 자동으로 javasciprt에서 &page=  & dataset = 를해줌 {% endcomment %}
      {% comment %} aria-disabled는 보조기능사용시에도 없앰 {% endcomment %}
     {% for page_number in question_list.paginator.page_range  %}
     {% if page_number >= question_list.number|add:-5 and page_number <= question_list.number|add:5  %}
     {% if page_number == question_list.number %}
     {% comment %} 현재페이지만 active하라 {% endcomment %}
       <li class="page-item active" aria-current="page">
-        <a class="page-link" href="?page={{page_number}} ">{{page_number}} </a>
+        <a class="page-link" data-page="{{page_number}} "
+        href="javascript:void(0)">{{page_number}} </a>
       </li>
       {% else %}
       <li class="page-item" aria-current="page">
         {% comment %} ?page안하면 게시판을들어가버림 내가원하는건 page이며
         ?pagee는 pagnator에서 가져오는것? {% endcomment %}
-        <a class="page-link" href="?page={{page_number}} ">{{page_number}} </a>
+        <a class="page-link" data-page="{{page_number}} "
+        href="javascript:void(0)">{{page_number}} </a>
       </li>
     {% endif %}
     {% endif %}
@@ -75,13 +100,47 @@
         {% if  question_list.has_next %}
         <li class="page-item">
             {% comment %} aria-disabled는 보조기능사용시에도 없앰 {% endcomment %}
-            <a class="page-link" href="?page= {{question_list.next_page_number}}" >다음</a>
+            <a class="page-link" data-page=" {{question_list.next_page_number}}"
+            href="javascript:void(0)" >다음</a>
         </li>
         
         {% else %}
           <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">다음</a>
+            <a class="page-link" href="javascript:void(0)" tabindex="-1" aria-disabled="true"
+            >다음</a>
           </li>
         {% endif %}
+        <div>
+<form id="searchForm" method="get" action="{% url 'index' %}">
+  <input type="hidden" id="kw" name="kw" value="{{kw|default_if_none:""}}">
+  <input type="hidden" id="page" name="page" value="{{ page }}">
+</form>
+</div>
+  {% comment %} url을 받아오는거지 html이 url인건아니다 {% endcomment %}
+  {% comment %} get이므로 /index라는 곳에 데이터르 받는다 {% endcomment %}
+  {% comment %} post는 /index라는곳에서 데이터를 보낸다 {% endcomment %}
+  {% comment %} 폼이전송되는 url 이므로 action지정  {% endcomment %}
 
+{% comment %} btnsearch 찾고, search_kw 클릭id부터찾는다 {% endcomment %}
+{% endblock  %}
+{% block script %}
+<script type="text/javascript">
+const page_elements = document.getElementsByClassName("page-link");
+Array.from(page_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        document.getElementById('page').value = this.dataset.page;
+        document.getElementById('searchForm').submit();
+    });
+});
+
+const btn_search=document.getElementById("btn_search");
+btn_search.addEventListener('click',function(){
+  document.getElementById('kw').value=document.getElementById('search_kw').value;
+  document.getElementById('page').value= 1;
+  document.getElementById('searchForm').submit();
+  
+});
+
+
+</script>
 {% endblock  %}

@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from pybo import views
+from pybo.views import base_views
 
 # url안에 views는 기본
 # 근데 pybo url안에 views를 쓰는게낫지
@@ -29,7 +30,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('pybo/',include('pybo.urls')),
     path('common/',include('common.urls')),
-    path('',views.index,name='index')
+    path('',base_views.index,name='index')
     #  '/' 에해당는 path
     # views를 가져와서 연결시켜야함
     # admin/은 원ㄹ래이씀
