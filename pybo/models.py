@@ -38,5 +38,5 @@ class Answer(models.Model):
     # stage(add)->commit(commit)
     # 일단 status하고 빨이면 stage->commit
     # 노란색이면 commit 까지
-    # status 아무것도안뜰때까지 해야함
+    # status 아무것도안뜰때까지 해야함ee
 # Create your models here.
