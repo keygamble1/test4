@@ -32,5 +32,11 @@ class Answer(models.Model):
     voter=models.ManyToManyField(User,related_name='voter_answer')
     # related안쓰면 Question모델에서 역참조할때  는 answer_set으로 Answer을 역참조가능
     # question.answer로 접근가능 
-    
+    # git status 주루룩나오면 commit이 안된거
+    # 빨간색이면 아직 add가안된거d
+    # statge->commit 해야하는데
+    # stage(add)->commit(commit)
+    # 일단 status하고 빨이면 stage->commit
+    # 노란색이면 commit 까지
+    # status 아무것도안뜰때까지 해야함
 # Create your models here.
